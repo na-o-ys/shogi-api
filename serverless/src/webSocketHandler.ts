@@ -48,13 +48,15 @@ export const runUsi: APIGatewayProxyHandler = async (
   const process = engineProcess.spawn(engine);
 
   let dataReceivedAt = Date.now();
+  let seqId = 0;
   process.stdout.pipe(split()).on("data", data => {
+    seqId += 1;
     dataReceivedAt = Date.now();
     console.debug(data);
     sendMessageToClient(
       event.requestContext,
       event.requestContext.connectionId,
-      data
+      JSON.stringify({ seqId, data })
     );
   });
 
