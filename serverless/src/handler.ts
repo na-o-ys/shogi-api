@@ -1,15 +1,9 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import "source-map-support/register";
 import { parse as parseInfo, selectBestPv } from "./info";
-import { spawn } from "child_process";
 import split from "split";
-import { copySync, chmodSync } from "fs-extra";
 import * as path from "path";
-
-const ENGINE_SRC_DIR = "engine";
-const ENGINE_DIR = "/tmp/engine";
-const EVAL_SRC_DIR = "eval";
-const EVAL_DIR = "/tmp/eval";
+import * as engineProcess from "./engine";
 
 const ENGINE = "dolphin101-sse42";
 const EVAL = "illqha4";
@@ -22,11 +16,10 @@ export const hello: APIGatewayProxyHandler = async (event, _context) => {
     engine = ENGINE,
     evalFn = EVAL
   } = event.queryStringParameters;
-  setup(engine);
 
-  const process = spawn(`./${engine}`, [], {
-    cwd: ENGINE_DIR
-  });
+  engineProcess.setup(engine);
+  const process = engineProcess.spawn(engine);
+
   process.stdin.write(generateCommand(byoyomi, position, multipv, evalFn));
   const result = await getResult(process.stdout);
   process.kill();
@@ -43,12 +36,6 @@ export const hello: APIGatewayProxyHandler = async (event, _context) => {
     )
   };
 };
-
-function setup(engine: string) {
-  copySync(ENGINE_SRC_DIR, ENGINE_DIR);
-  copySync(EVAL_SRC_DIR, EVAL_DIR);
-  chmodSync(path.resolve(ENGINE_DIR, engine), 0o755);
-}
 
 function getResult(stdout: NodeJS.ReadableStream) {
   let infoList = [];
@@ -79,7 +66,7 @@ function generateCommand(
 setoption name USI_Ponder value false
 setoption name Hash value 2500
 setoption name MultiPV value ${multipv}
-setoption name EvalDir value ${path.resolve(EVAL_DIR, evalFn)}
+setoption name EvalDir value ${path.resolve(engineProcess.EVAL_DIR, evalFn)}
 isready
 usinewgame
 position ${position}

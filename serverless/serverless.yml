@@ -12,7 +12,7 @@ plugins:
 provider:
   name: aws
   region: ap-northeast-1
-  timeout: 
+  timeout:
   runtime: nodejs12.x
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
@@ -27,5 +27,23 @@ functions:
           method: get
           path: bestmove
           cors: true
+    memorySize: 3008
+    timeout: 900
+  # connectionHandler:
+  #   handler: handler.connectionHandler
+  #   events:
+  #     - websocket:
+  #         route: $connect
+  #     - websocket:
+  #         route: $disconnect
+  # defaultHandler:
+  #   handler: handler.defaultHandler
+  #   events:
+  #     - websocket: $default
+  runUsi:
+    handler: src/webSocketHandler.runUsi
+    events:
+      - websocket:
+          route: runUsi
     memorySize: 3008
     timeout: 900
