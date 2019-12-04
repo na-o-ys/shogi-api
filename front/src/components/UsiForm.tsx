@@ -1,16 +1,15 @@
-import React, { useContext } from "react";
-import { StateContext, DispatchContext } from "../App";
 import {
   FormControl,
-  FormLabel,
-  Input,
-  Grid,
-  Box,
-  Select,
   FormHelperText,
+  FormLabel,
+  Grid,
+  Icon,
+  Input,
   Link,
-  Icon
+  Select
 } from "@chakra-ui/core";
+import React, { useContext } from "react";
+import { DispatchContext, StateContext } from "../App";
 
 export const UsiForm: React.FC = () => {
   const state = useContext(StateContext).usiForm;

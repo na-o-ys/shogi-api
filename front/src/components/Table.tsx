@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
 import { Box, BoxProps } from "@chakra-ui/core";
+import React from "react";
 
 export const Table = (props: BoxProps) => (
   <Box as="table" textAlign="left" width="full" {...props} />

@@ -1,7 +1,7 @@
+import { Box } from "@chakra-ui/core";
 import React, { useContext } from "react";
-import { StateContext, DispatchContext } from "../App";
-import { Box, Tab } from "@chakra-ui/core";
-import { Table, THead, TData } from "./Table";
+import { StateContext } from "../App";
+import { Table, TData, THead } from "./Table";
 
 export const AiOutput: React.FC = () => {
   const state = useContext(StateContext).aiOutput;
@@ -52,10 +52,10 @@ function scoreToText({
   scoreCp?: number;
   scoreMate?: number;
 }): string {
-  if (scoreCp != undefined) {
+  if (scoreCp !== undefined) {
     return scoreCp > 0 ? `+${scoreCp}` : `${scoreCp}`;
   }
-  if (scoreMate != undefined) {
+  if (scoreMate !== undefined) {
     return `${Math.abs(scoreMate)}手で${scoreMate > 0 ? "先手" : "後手"}勝ち`;
   }
   return "-";

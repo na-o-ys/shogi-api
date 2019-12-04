@@ -46,7 +46,7 @@ export function createMoveFromSfen(
       rank: sfen.charCodeAt(1) - "a".charCodeAt(0) + 1
     };
     const piece = getPiece(position, from);
-    if (piece == null) {
+    if (piece === null) {
       return null;
     }
     const promote = sfen[4] === "+";
@@ -61,18 +61,18 @@ export function createMoveFromSfen(
 }
 
 export function convertMoveJp(move: Move): string {
-  const side = move.piece.side == "b" ? "▲" : "△";
+  const side = move.piece.side === "b" ? "▲" : "△";
   const moveTo = `${move.to.file}${move.to.rank}`;
   const piece = jpPieceMap[move.piece.piece];
   let promote = "";
   if (
-    move.type == "move_from_cell" &&
+    move.type === "move_from_cell" &&
     canPromote(move.from, move.to, move.piece)
   ) {
     promote = move.promote ? "成" : "不成";
   }
   const moveFrom =
-    move.type == "move_from_cell"
+    move.type === "move_from_cell"
       ? `(${move.from.file}${move.from.rank})`
       : "打";
 

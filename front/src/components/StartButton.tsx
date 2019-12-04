@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Button } from "@chakra-ui/core";
-import { StateContext, DispatchContext, startAiActionCreator } from "../App";
+import { StateContext, DispatchContext } from "../App";
+import { startAiActionCreator } from "../actions";
 
 export const StartButton: React.FC = () => {
   const {

@@ -52,11 +52,34 @@ export function convertPvToMove(
   let lastMove: Move | null;
   for (const moveStr of pv) {
     lastMove = createMoveFromSfen(moveStr, position);
-    if (lastMove == null) return null;
+    if (lastMove === null) return null;
     result.push(lastMove);
     position = doMove(position, lastMove);
   }
   return result;
+}
+
+export function generateUsiCommand({
+  hash,
+  multiPv,
+  sfen,
+  byoyomiSec
+}: {
+  hash: number;
+  multiPv: number;
+  sfen: string;
+  byoyomiSec: number;
+}) {
+  return `usi
+setoption name USI_Ponder value false
+setoption name Hash value ${hash}
+setoption name MultiPV value ${multiPv}
+setoption name ConsiderationMode value true
+setoption name EvalDir value /tmp/eval/illqha4
+isready
+usinewgame
+position sfen ${sfen}
+go btime 0 wtime 0 byoyomi ${byoyomiSec * 1000}\n`;
 }
 
 function parseInfoCommand(
@@ -139,14 +162,14 @@ function parseBestMoveCommand(
   words: string[],
   position: Position
 ): UsiBestMoveCommand | null {
-  if (words[0] == "resign") {
+  if (words[0] === "resign") {
     return { commandType: "bestMove", type: "resign" };
   }
-  if (words[0] == "win") {
+  if (words[0] === "win") {
     return { commandType: "bestMove", type: "win" };
   }
   const move = createMoveFromSfen(words[0], position);
-  if (move == null) return null;
+  if (move === null) return null;
   return {
     commandType: "bestMove",
     type: "move",

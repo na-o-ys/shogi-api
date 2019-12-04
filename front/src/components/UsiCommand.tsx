@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
-import { StateContext, DispatchContext } from "../App";
 import { Box } from "@chakra-ui/core";
+import React, { useContext } from "react";
+import { StateContext } from "../App";
 
 export const UsiCommand: React.FC = () => {
   const state = useContext(StateContext).usiCommand;

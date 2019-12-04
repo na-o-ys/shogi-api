@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from "react";
-import { StateContext, DispatchContext } from "../App";
 import { Box, useTheme } from "@chakra-ui/core";
+import React, { useContext, useEffect } from "react";
+import { StateContext } from "../App";
 
 type Line = {
   direction: "in" | "out";
@@ -17,7 +17,6 @@ const Line: React.FC<{ line: Line }> = ({ line }) => {
 
 export const Console: React.FC = () => {
   const { usiCommand, aiRawOutput } = useContext(StateContext);
-  const dispatch = useContext(DispatchContext);
 
   const input: Line[] = usiCommand
     .split("\n")
