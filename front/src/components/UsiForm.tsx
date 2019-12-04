@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { StateContext, DispatchContext } from "../App";
+import { FormControl, FormLabel, Input } from "@chakra-ui/core";
 
 export const UsiForm: React.FC = () => {
   const state = useContext(StateContext).usiForm;
@@ -16,41 +17,41 @@ export const UsiForm: React.FC = () => {
 
   return (
     <div>
-      <form>
-        <label>
-          sfen
-          <input
-            type="text"
-            value={state.sfen}
-            onChange={handleFormChange("sfen")}
-          />
-        </label>
-        {/* <img src={`http://sfenreader.appspot.com/sfen?sfen=${state.sfen}`} /> */}
-        <label>
-          byoyomi
-          <input
-            type="number"
-            value={state.byoyomi}
-            onChange={handleFormChange("byoyomi")}
-          />{" "}
-        </label>
-        <label>
-          multiPv
-          <input
-            type="number"
-            value={state.multiPv}
-            onChange={handleFormChange("multiPv")}
-          />
-        </label>
-        <label>
-          hash
-          <input
-            type="number"
-            value={state.hash}
-            onChange={handleFormChange("hash")}
-          />
-        </label>
-      </form>
+      <FormControl>
+        <FormLabel htmlFor="sfen">sfen</FormLabel>
+        <Input
+          id="sfen"
+          value={state.sfen}
+          onChange={handleFormChange("sfen")}
+        />
+      </FormControl>
+      <FormControl>
+        <FormLabel htmlFor="byoyomi">byoyomi (ms)</FormLabel>
+        <Input
+          type="number"
+          id="byoyomi"
+          value={state.byoyomi}
+          onChange={handleFormChange("byoyomi")}
+        />
+      </FormControl>
+      <FormControl>
+        <FormLabel htmlFor="multipv">multi pv</FormLabel>
+        <Input
+          type="number"
+          id="multipv"
+          value={state.multiPv}
+          onChange={handleFormChange("multiPv")}
+        />
+      </FormControl>
+      <FormControl>
+        <FormLabel htmlFor="hash">hash (MB)</FormLabel>
+        <Input
+          type="number"
+          id="hash"
+          value={state.hash}
+          onChange={handleFormChange("hash")}
+        />
+      </FormControl>
     </div>
   );
 };

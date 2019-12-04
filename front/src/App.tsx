@@ -8,6 +8,7 @@ import { parseCommand, UsiEngineCommand } from "./shogi/usi";
 import { createPositionFromSfen, Position } from "./shogi/position";
 import { Move, convertMoveJp } from "./shogi/move";
 import { AiOutput } from "./components/AiOutput";
+import { Grid, Box, CSSReset, ThemeProvider, Button } from "@chakra-ui/core";
 
 type State = {
   usiForm: {
@@ -253,16 +254,30 @@ const App: React.FC = () => {
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
-        <button
-          onClick={() => startAiActionCreator(state.usiCommand, dispatch)}
-        >
-          Start
-        </button>
-        <UsiForm />
-        <UsiCommand />
-        <BoardImage />
-        <AiRawOutput />
-        <AiOutput />
+        <ThemeProvider>
+          <CSSReset />
+          <Grid templateColumns="1fr" gap={2} my={8} mx={60}>
+            <Grid templateColumns="auto 400px">
+              <Box>
+                <UsiForm />
+                <Button
+                  variantColor="teal"
+                  onClick={() =>
+                    startAiActionCreator(state.usiCommand, dispatch)
+                  }
+                >
+                  Start
+                </Button>
+              </Box>
+              <BoardImage />
+            </Grid>
+            <Grid templateColumns="1fr 1fr" gap={2}>
+              <UsiCommand />
+              <AiRawOutput />
+            </Grid>
+            <AiOutput />
+          </Grid>
+        </ThemeProvider>
       </DispatchContext.Provider>
     </StateContext.Provider>
   );
