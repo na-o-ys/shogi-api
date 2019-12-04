@@ -1,9 +1,8 @@
 import React, { Dispatch, useReducer } from "react";
 import "./App.css";
 import { UsiForm } from "./components/UsiForm";
-import { UsiCommand } from "./components/UsiCommand";
+import { Console } from "./components/Console";
 import { BoardImage } from "./components/BoardImage";
-import { AiRawOutput } from "./components/AiRawOutput";
 import { parseCommand, UsiEngineCommand } from "./shogi/usi";
 import { createPositionFromSfen, Position } from "./shogi/position";
 import { Move, convertMoveJp } from "./shogi/move";
@@ -13,7 +12,7 @@ import { Grid, Box, CSSReset, ThemeProvider, Button } from "@chakra-ui/core";
 type State = {
   usiForm: {
     sfen: string;
-    byoyomi: number;
+    byoyomiSec: number;
     multiPv: number;
     hash: number;
   };
@@ -43,7 +42,7 @@ type State = {
 const initialStateUsiForm = {
   sfen:
     "lr5nl/2g1kg1s1/p1npppbpp/2ps5/8P/2P3R2/PP1PPPP1N/1SGB1S3/LN1KG3L w 2Pp 1",
-  byoyomi: 30000,
+  byoyomiSec: 30,
   multiPv: 3,
   hash: 512
 };
@@ -60,6 +59,36 @@ const initialState: State = {
   aiRawOutput: [],
   usiEngineCommands: [],
   aiOutput: { seqId: -1 }
+  // aiOutput: {
+  //   seqId: -1,
+  //   pv: [
+  //     {
+  //       multipv: 1,
+  //       movesJp: [
+  //         "△94歩(93)",
+  //         "▲77銀(88)",
+  //         "△24歩(23)",
+  //         "▲56歩(57)",
+  //         "△23銀(22)",
+  //         "▲25歩打",
+  //         "△95歩(94)",
+  //         "▲55歩(56)",
+  //         "△55銀(64)",
+  //         "▲75歩(76)",
+  //         "△75歩(74)",
+  //         "▲74歩打",
+  //         "△65桂(73)",
+  //         "▲86銀(77)",
+  //         "△25歩(24)",
+  //         "▲25桂(17)",
+  //         "△24角(33)",
+  //         "▲22歩打"
+  //       ],
+  //       seqId: -1,
+  //       depth: 20
+  //     }
+  //   ]
+  // }
 };
 
 type Action =
@@ -103,7 +132,7 @@ setoption name EvalDir value /tmp/eval/illqha4
 isready
 usinewgame
 position sfen ${usiForm.sfen}
-go btime 0 wtime 0 byoyomi ${usiForm.byoyomi}\n`;
+go btime 0 wtime 0 byoyomi ${usiForm.byoyomiSec * 1000}\n`;
 }
 
 function initializeWebSocketConnection(url: string): Promise<WebSocket> {
@@ -256,12 +285,21 @@ const App: React.FC = () => {
       <DispatchContext.Provider value={dispatch}>
         <ThemeProvider>
           <CSSReset />
-          <Grid templateColumns="1fr" gap={2} my={8} mx={60}>
-            <Grid templateColumns="auto 400px">
-              <Box>
+          <Grid
+            templateColumns="1fr"
+            gap={2}
+            my={8}
+            mx="auto"
+            px="2rem"
+            maxWidth="1024px"
+          >
+            <Grid templateColumns="1fr 300px" gap={1} my={8} height="308px">
+              <Box my="auto">
                 <UsiForm />
                 <Button
                   variantColor="teal"
+                  size="lg"
+                  my={4}
                   onClick={() =>
                     startAiActionCreator(state.usiCommand, dispatch)
                   }
@@ -271,11 +309,8 @@ const App: React.FC = () => {
               </Box>
               <BoardImage />
             </Grid>
-            <Grid templateColumns="1fr 1fr" gap={2}>
-              <UsiCommand />
-              <AiRawOutput />
-            </Grid>
             <AiOutput />
+            <Console />
           </Grid>
         </ThemeProvider>
       </DispatchContext.Provider>
