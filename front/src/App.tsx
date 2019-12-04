@@ -4,8 +4,10 @@ import { UsiForm } from "./components/UsiForm";
 import { UsiCommand } from "./components/UsiCommand";
 import { BoardImage } from "./components/BoardImage";
 import { AiRawOutput } from "./components/AiRawOutput";
-import { Move, Position } from "./shogi";
 import { parseCommand, UsiEngineCommand } from "./shogi/usi";
+import { createPositionFromSfen, Position } from "./shogi/position";
+import { Move, convertMoveJp } from "./shogi/move";
+import { AiOutput } from "./components/AiOutput";
 
 type State = {
   usiForm: {
@@ -18,26 +20,30 @@ type State = {
   boardImageSfen: string;
   aiRawOutput: { seqId: number; data: string }[];
   usiEngineCommands: { seqId: number; command: UsiEngineCommand }[];
+  position: Position | null;
   aiOutput: {
     pv?: {
       scoreCp?: number;
       scoreMate?: number;
       depth?: number;
       seldepth?: number;
-      moves: Move[];
-      multipv?: number;
+      movesJp: string[];
+      multipv: number;
+      seqId: number;
     }[];
+    bestMove?: string;
     nps?: number;
     hashfull?: number;
     nodes?: number;
+    seqId: number;
   };
 };
 
 const initialStateUsiForm = {
   sfen:
     "lr5nl/2g1kg1s1/p1npppbpp/2ps5/8P/2P3R2/PP1PPPP1N/1SGB1S3/LN1KG3L w 2Pp 1",
-  byoyomi: 1000,
-  multiPv: 10,
+  byoyomi: 30000,
+  multiPv: 3,
   hash: 512
 };
 
@@ -49,9 +55,10 @@ const initialState: State = {
   usiForm: initialStateUsiForm,
   usiCommand: initialStateUsiCommand,
   boardImageSfen: initialStateBoardImageSfen,
+  position: createPositionFromSfen(initialStateUsiForm.sfen),
   aiRawOutput: [],
   usiEngineCommands: [],
-  aiOutput: {}
+  aiOutput: { seqId: -1 }
 };
 
 type Action =
@@ -127,18 +134,29 @@ function startAiActionCreator(command: string, dispatch: Dispatch<Action>) {
   });
 }
 
-function reducer(state: State, action: Action) {
-  console.log(action);
+function reducer(state: State, action: Action): State {
+  return {
+    ...generalReducer(state, action),
+    aiOutput: aiOutputReducer(state, action)
+  };
+}
+
+function generalReducer(state: State, action: Action): State {
   switch (action.type) {
     case "handleUsiFormChange": {
       const usiForm = Object.assign({}, state.usiForm, {
         [action.formName]: action.formValue
       });
       const usiCommand = generateUsiCommand(usiForm);
+      let position = state.position;
+      if (state.usiForm.sfen != usiForm.sfen) {
+        position = createPositionFromSfen(usiForm.sfen);
+      }
       return {
         ...state,
         usiForm,
-        usiCommand
+        usiCommand,
+        position
       };
     }
     case "handleUsiCommandChange": {
@@ -163,9 +181,6 @@ function reducer(state: State, action: Action) {
       const aiRawOutput = state.aiRawOutput
         .concat(action.data)
         .sort((a, b) => a.seqId - b.seqId);
-      console.log(
-        parseCommand(action.data.data, Position.fromSfen(state.usiForm.sfen))
-      );
       return {
         ...state,
         aiRawOutput
@@ -174,6 +189,58 @@ function reducer(state: State, action: Action) {
     default:
       return state;
   }
+}
+
+function aiOutputReducer(
+  { position, aiOutput }: State,
+  action: Action
+): State["aiOutput"] {
+  if (action.type == "startAi") return initialState.aiOutput;
+  if (action.type != "receiveAiOutput") return aiOutput;
+  if (!action.data.data || !position) return aiOutput;
+  const cmd = parseCommand(action.data.data, position);
+  if (!cmd) return aiOutput;
+
+  const currentSeqId = action.data.seqId;
+  let newAiOutput = JSON.parse(JSON.stringify(aiOutput)) as State["aiOutput"];
+
+  if (cmd.commandType == "info" && aiOutput.seqId < currentSeqId) {
+    const { nps, hashfull, nodes } = cmd;
+    newAiOutput = Object.assign({}, newAiOutput, {
+      nps,
+      hashfull,
+      nodes,
+      seqId: currentSeqId
+    });
+  }
+
+  if (cmd.commandType == "info" && cmd.pv) {
+    const multipv = cmd.multipv || 1;
+    const prevPv = (aiOutput.pv || []).find(pv => pv.multipv == multipv);
+    const prevSeqId = prevPv ? prevPv.seqId : -1;
+    if (prevSeqId < currentSeqId) {
+      const newPv =
+        (newAiOutput.pv || []).filter(pv => pv.multipv != multipv) || [];
+      const { scoreCp, scoreMate, depth, seldepth } = cmd;
+      newPv.push({
+        scoreCp,
+        scoreMate,
+        depth,
+        seldepth,
+        movesJp: cmd.pv.map(convertMoveJp),
+        multipv,
+        seqId: currentSeqId
+      });
+      newPv.sort((a, b) => a.multipv - b.multipv);
+      newAiOutput.pv = newPv;
+    }
+  }
+
+  if (cmd.commandType == "bestMove" && cmd.type == "move") {
+    newAiOutput.bestMove = convertMoveJp(cmd.move);
+  }
+
+  return newAiOutput;
 }
 
 export const StateContext = React.createContext<State>(null as any);
@@ -195,6 +262,7 @@ const App: React.FC = () => {
         <UsiCommand />
         <BoardImage />
         <AiRawOutput />
+        <AiOutput />
       </DispatchContext.Provider>
     </StateContext.Provider>
   );

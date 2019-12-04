@@ -1,14 +1,16 @@
-import { Position, Move } from "./index";
+import { Move, createMoveFromSfen } from "./move";
+import { Position, doMove } from "./position";
 
 export type UsiEngineCommand = UsiInfoCommand | UsiBestMoveCommand;
 
 export type UsiInfoCommand = {
+  commandType: "info";
   depth?: number;
   seldepth?: number;
   time?: number;
   nodes?: number;
-  pv?: string[];
-  pvMoves?: Move[];
+  pvSfen?: string[];
+  pv?: Move[];
   multipv?: number;
   scoreCp?: number;
   scoreMate?: number;
@@ -18,9 +20,11 @@ export type UsiInfoCommand = {
 
 export type UsiBestMoveCommand =
   | {
+      commandType: "bestMove";
       type: "resign" | "win";
     }
   | {
+      commandType: "bestMove";
       type: "move";
       move: Move;
     };
@@ -40,13 +44,17 @@ export function parseCommand(
   }
 }
 
-export function convertPvToMove(pv: string[], position: Position): Move[] {
+export function convertPvToMove(
+  pv: string[],
+  position: Position
+): Move[] | null {
   const result: Move[] = [];
-  let lastMove: Move | undefined;
-  for (const moveStr in pv) {
-    lastMove = Move.fromSfen(moveStr, position, lastMove);
+  let lastMove: Move | null;
+  for (const moveStr of pv) {
+    lastMove = createMoveFromSfen(moveStr, position);
+    if (lastMove == null) return null;
     result.push(lastMove);
-    position = position.doMove(lastMove);
+    position = doMove(position, lastMove);
   }
   return result;
 }
@@ -55,7 +63,7 @@ function parseInfoCommand(
   words: string[],
   position: Position
 ): UsiInfoCommand | null {
-  let result: UsiInfoCommand = {};
+  let result: UsiInfoCommand = { commandType: "info" };
   let i = 0;
   const stopCommands = [
     "depth",
@@ -95,8 +103,9 @@ function parseInfoCommand(
           pv.push(words[i]);
           i += 1;
         }
-        result["pv"] = pv;
-        result["pvMoves"] = convertPvToMove(pv, position);
+        result["pvSfen"] = pv;
+        const converted = convertPvToMove(pv, position);
+        if (converted) result["pv"] = converted;
         break;
       case "multipv":
         result["multipv"] = Number.parseInt(words[i + 1], 10);
@@ -131,13 +140,16 @@ function parseBestMoveCommand(
   position: Position
 ): UsiBestMoveCommand | null {
   if (words[0] == "resign") {
-    return { type: "resign" };
+    return { commandType: "bestMove", type: "resign" };
   }
   if (words[0] == "win") {
-    return { type: "win" };
+    return { commandType: "bestMove", type: "win" };
   }
+  const move = createMoveFromSfen(words[0], position);
+  if (move == null) return null;
   return {
+    commandType: "bestMove",
     type: "move",
-    move: Move.fromSfen(words[0], position)
+    move
   };
 }
