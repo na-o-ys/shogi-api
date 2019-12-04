@@ -1,13 +1,21 @@
 import React, { Dispatch, useReducer } from "react";
 import "./App.css";
-import { UsiForm } from "./components/UsiForm";
+import { UsiForm, preloadImages } from "./components/UsiForm";
 import { Console } from "./components/Console";
 import { BoardImage } from "./components/BoardImage";
 import { parseCommand, UsiEngineCommand } from "./shogi/usi";
 import { createPositionFromSfen, Position } from "./shogi/position";
 import { Move, convertMoveJp } from "./shogi/move";
 import { AiOutput } from "./components/AiOutput";
-import { Grid, Box, CSSReset, ThemeProvider, Button } from "@chakra-ui/core";
+import {
+  Grid,
+  Box,
+  CSSReset,
+  ThemeProvider,
+  Button,
+  ColorModeProvider
+} from "@chakra-ui/core";
+import { StartButton } from "./components/StartButton";
 
 type State = {
   usiForm: {
@@ -36,14 +44,15 @@ type State = {
     hashfull?: number;
     nodes?: number;
     seqId: number;
+    isThinking: boolean;
   };
 };
 
 const initialStateUsiForm = {
   sfen:
-    "lr5nl/2g1kg1s1/p1npppbpp/2ps5/8P/2P3R2/PP1PPPP1N/1SGB1S3/LN1KG3L w 2Pp 1",
+    "ln1g5/1r4k2/p2pppn2/2ps2p2/1p7/2P6/PPSPPPPLP/2G2K1pr/LN4G1b b BG2SLPnp 1",
   byoyomiSec: 30,
-  multiPv: 3,
+  multiPv: 5,
   hash: 512
 };
 
@@ -58,7 +67,7 @@ const initialState: State = {
   position: createPositionFromSfen(initialStateUsiForm.sfen),
   aiRawOutput: [],
   usiEngineCommands: [],
-  aiOutput: { seqId: -1 }
+  aiOutput: { seqId: -1, isThinking: false }
   // aiOutput: {
   //   seqId: -1,
   //   pv: [
@@ -94,6 +103,7 @@ const initialState: State = {
 type Action =
   | HandleUsiFormChangeAction
   | HandleUsiCommandChangeAction
+  | HandleSfenSampleSelectedAction
   | UpdateBoardImageAction
   | StartAiAction
   | ReceiveAiOutputAction;
@@ -106,6 +116,11 @@ type HandleUsiFormChangeAction = {
 
 type HandleUsiCommandChangeAction = {
   type: "handleUsiCommandChange";
+  value: string;
+};
+
+type HandleSfenSampleSelectedAction = {
+  type: "handleSfenSampleSelected";
   value: string;
 };
 
@@ -157,7 +172,10 @@ async function startAi(command: string, onMessage: (ev: MessageEvent) => void) {
   );
 }
 
-function startAiActionCreator(command: string, dispatch: Dispatch<Action>) {
+export function startAiActionCreator(
+  command: string,
+  dispatch: Dispatch<Action>
+) {
   dispatch({ type: "startAi" });
   startAi(command, ev => {
     dispatch({ type: "receiveAiOutput", data: JSON.parse(ev.data) });
@@ -187,6 +205,16 @@ function generalReducer(state: State, action: Action): State {
         usiForm,
         usiCommand,
         position
+      };
+    }
+    case "handleSfenSampleSelected": {
+      return {
+        ...state,
+        usiForm: {
+          ...state.usiForm,
+          sfen: action.value
+        },
+        boardImageSfen: action.value
       };
     }
     case "handleUsiCommandChange": {
@@ -225,7 +253,8 @@ function aiOutputReducer(
   { position, aiOutput }: State,
   action: Action
 ): State["aiOutput"] {
-  if (action.type == "startAi") return initialState.aiOutput;
+  if (action.type == "startAi")
+    return { ...initialState.aiOutput, isThinking: true };
   if (action.type != "receiveAiOutput") return aiOutput;
   if (!action.data.data || !position) return aiOutput;
   const cmd = parseCommand(action.data.data, position);
@@ -266,6 +295,10 @@ function aiOutputReducer(
     }
   }
 
+  if (cmd.commandType == "bestMove") {
+    newAiOutput.isThinking = false;
+  }
+
   if (cmd.commandType == "bestMove" && cmd.type == "move") {
     newAiOutput.bestMove = convertMoveJp(cmd.move);
   }
@@ -280,6 +313,7 @@ export const DispatchContext = React.createContext<Dispatch<Action>>(
 
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  preloadImages();
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
@@ -296,16 +330,7 @@ const App: React.FC = () => {
             <Grid templateColumns="1fr 300px" gap={1} my={8} height="308px">
               <Box my="auto">
                 <UsiForm />
-                <Button
-                  variantColor="teal"
-                  size="lg"
-                  my={4}
-                  onClick={() =>
-                    startAiActionCreator(state.usiCommand, dispatch)
-                  }
-                >
-                  Start
-                </Button>
+                <StartButton />
               </Box>
               <BoardImage />
             </Grid>

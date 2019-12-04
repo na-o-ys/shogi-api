@@ -26,7 +26,7 @@ export const AiOutput: React.FC = () => {
             >
               <TData>{pv.multipv}</TData>
               <TData>{pv.movesJp[0]}</TData>
-              <TData>{scoreToText(pv.scoreCp)}</TData>
+              <TData>{scoreToText(pv)}</TData>
               <TData>{pv.depth}</TData>
               <TData whiteSpace="nowrap" overflow="scroll">
                 {pv.movesJp.join("")}
@@ -45,7 +45,18 @@ const dummyPv = {
   depth: "-"
 };
 
-function scoreToText(score: number | undefined): string {
-  if (score == undefined) return "-";
-  return score > 0 ? `+${score}` : `${score}`;
+function scoreToText({
+  scoreCp,
+  scoreMate
+}: {
+  scoreCp?: number;
+  scoreMate?: number;
+}): string {
+  if (scoreCp != undefined) {
+    return scoreCp > 0 ? `+${scoreCp}` : `${scoreCp}`;
+  }
+  if (scoreMate != undefined) {
+    return `${Math.abs(scoreMate)}手で${scoreMate > 0 ? "先手" : "後手"}勝ち`;
+  }
+  return "-";
 }

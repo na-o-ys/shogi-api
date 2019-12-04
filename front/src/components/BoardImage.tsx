@@ -9,7 +9,9 @@ export const BoardImage: React.FC = () => {
   return (
     <Box>
       <img
-        src={`http://sfenreader.appspot.com/sfen?sfen=${state}`}
+        src={`http://sfenreader.appspot.com/sfen?sfen=${encodeURIComponent(
+          state
+        )}`}
         width="300px"
         height="308px"
         onClick={e => dispatch({ type: "updateBoardImage" })}

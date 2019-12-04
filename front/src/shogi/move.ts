@@ -35,13 +35,10 @@ export function createMoveFromSfen(
   };
   const fromHand = sfen[1] === "*";
   if (fromHand) {
-    const piece = sfen[0].toLowerCase() as Piece;
-    let side: "b" | "w" = "b";
-    if (sfen[0] == sfen[0].toLowerCase()) side = "w";
     return {
       type: "move_from_hand",
       to,
-      piece: { piece, side }
+      piece: { piece: sfen[0].toLowerCase() as Piece, side: position.side }
     };
   } else {
     const from = {

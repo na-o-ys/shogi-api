@@ -9,7 +9,7 @@ import * as engineProcess from "./engine";
 import split from "split";
 
 const ENGINE = "dolphin101-sse42";
-const TIMEOUT_MS = 10_000;
+const TIMEOUT_MS = 30_000;
 
 export const connect: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
