@@ -12,23 +12,32 @@ import React, { useContext } from "react";
 import { DispatchContext, StateContext } from "../App";
 
 export const UsiForm: React.FC = () => {
-  const state = useContext(StateContext).usiForm;
+  const {
+    usiForm,
+    aiOutput: { isThinking }
+  } = useContext(StateContext);
   const dispatch = useContext(DispatchContext);
 
-  const handleFormChange = (formName: keyof typeof state) => (
+  const handleFormChange = (formName: keyof typeof usiForm) => (
     e: React.ChangeEvent<any>
-  ) =>
-    dispatch({
-      type: "handleUsiFormChange",
-      formName,
-      formValue: e.target.value
-    });
+  ) => {
+    if (!isThinking) {
+      dispatch({
+        type: "handleUsiFormChange",
+        formName,
+        formValue: e.target.value
+      });
+    }
+  };
 
-  const handleSampleSelected = (sample: "sample1" | "sample2" | "sample3") =>
-    dispatch({
-      type: "handleSfenSampleSelected",
-      value: sfenSamples[sample]
-    });
+  const handleSampleSelected = (sample: "sample1" | "sample2" | "sample3") => {
+    if (!isThinking) {
+      dispatch({
+        type: "handleSfenSampleSelected",
+        value: sfenSamples[sample]
+      });
+    }
+  };
 
   return (
     <Grid templateColumns="1fr 1fr 1fr" columnGap={2} rowGap={4}>
@@ -40,6 +49,7 @@ export const UsiForm: React.FC = () => {
             aria-labelledby=""
             onChange={e => handleSampleSelected(e.target.value as any)}
             defaultValue="sample1"
+            isDisabled={isThinking}
           >
             <option value="sample1">Sample 1</option>
             <option value="sample2">Sample 2</option>
@@ -47,8 +57,9 @@ export const UsiForm: React.FC = () => {
           </Select>
           <Input
             id="sfen"
-            value={state.sfen}
+            value={usiForm.sfen}
             onChange={handleFormChange("sfen")}
+            isDisabled={isThinking}
           />
         </Grid>
         <FormHelperText>
@@ -62,8 +73,9 @@ export const UsiForm: React.FC = () => {
         <Input
           type="number"
           id="byoyomi"
-          value={state.byoyomiSec}
+          value={usiForm.byoyomiSec}
           onChange={handleFormChange("byoyomiSec")}
+          isDisabled={isThinking}
         />
       </FormControl>
       <FormControl>
@@ -71,8 +83,9 @@ export const UsiForm: React.FC = () => {
         <Input
           type="number"
           id="multipv"
-          value={state.multiPv}
+          value={usiForm.multiPv}
           onChange={handleFormChange("multiPv")}
+          isDisabled={isThinking}
         />
       </FormControl>
       <FormControl>
@@ -80,8 +93,9 @@ export const UsiForm: React.FC = () => {
         <Input
           type="number"
           id="hash"
-          value={state.hash}
+          value={usiForm.hash}
           onChange={handleFormChange("hash")}
+          isDisabled={isThinking}
         />
       </FormControl>
     </Grid>

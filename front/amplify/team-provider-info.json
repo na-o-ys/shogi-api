@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-sshogi-demo-dev-02355-authRole",
+            "UnauthRoleArn": "arn:aws:iam::856743198237:role/amplify-sshogi-demo-dev-02355-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::856743198237:role/amplify-sshogi-demo-dev-02355-authRole",
+            "Region": "ap-northeast-1",
+            "DeploymentBucketName": "amplify-sshogi-demo-dev-02355-deployment",
+            "UnauthRoleName": "amplify-sshogi-demo-dev-02355-unauthRole",
+            "StackName": "amplify-sshogi-demo-dev-02355",
+            "StackId": "arn:aws:cloudformation:ap-northeast-1:856743198237:stack/amplify-sshogi-demo-dev-02355/15fc0230-16aa-11ea-8e09-0ac3b391d020"
+        }
+    }
+}
