@@ -1,4 +1,4 @@
-import { copySync, chmodSync } from "fs-extra";
+import { copySync, chmodSync, emptyDirSync } from "fs-extra";
 import * as path from "path";
 import * as childProcess from "child_process";
 
@@ -8,6 +8,7 @@ const EVAL_SRC_DIR = "eval";
 export const EVAL_DIR = "/tmp/eval";
 
 export function setup(engine: string) {
+  emptyDirSync("/tmp");
   copySync(ENGINE_SRC_DIR, ENGINE_DIR);
   copySync(EVAL_SRC_DIR, EVAL_DIR);
   chmodSync(path.resolve(ENGINE_DIR, engine), 0o755);
