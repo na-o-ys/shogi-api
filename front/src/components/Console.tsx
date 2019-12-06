@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@chakra-ui/core";
+import { Box, useTheme, BoxProps } from "@chakra-ui/core";
 import React, { useContext, useEffect } from "react";
 import { StateContext } from "../App";
 
@@ -15,7 +15,7 @@ const Line: React.FC<{ line: Line }> = ({ line }) => {
   );
 };
 
-export const Console: React.FC = () => {
+export const Console: React.FC<BoxProps> = (props: BoxProps) => {
   const { usiCommand, aiRawOutput } = useContext(StateContext);
 
   const input: Line[] = usiCommand
@@ -32,13 +32,24 @@ export const Console: React.FC = () => {
   const lines = input.concat(output);
 
   useEffect(() => {
-    const el = document.getElementById("consoleEnd");
-    if (el) el.scrollIntoView({ behavior: "auto" });
+    const body = document.getElementById("consoleTextArea");
+    const container = document.getElementById("consoleTextAreaContainer");
+    if (body && container) container.scrollTop = body.clientHeight;
   });
 
   return (
-    <Box position="relative" overflow="scroll" bg="gray.800" rounded="lg">
-      <Box overflow="scroll" h={260}>
+    <Box
+      position="relative"
+      overflow="scroll"
+      bg="gray.800"
+      rounded="lg"
+      {...props}
+    >
+      <Box
+        overflow="scroll"
+        h={{ base: 200, md: 260 }}
+        id="consoleTextAreaContainer"
+      >
         <style>{`
         .line-in:before {
           content: "> ";
@@ -49,12 +60,11 @@ export const Console: React.FC = () => {
           color: ${useTheme().colors.gray[500]};
         }
         `}</style>
-        <Box m="5" color="gray.200" fontSize="xs">
+        <Box m="5" color="gray.200" fontSize="xs" id="consoleTextArea">
           {lines.map((line, idx) => (
             <Line line={line} key={idx} />
           ))}
         </Box>
-        <div id="consoleEnd" style={{ float: "left", clear: "both" }}></div>
       </Box>
       <Box
         position="absolute"

@@ -1,8 +1,9 @@
 import {
+  Box,
+  BoxProps,
   FormControl,
   FormHelperText,
   FormLabel,
-  Grid,
   Icon,
   Input,
   Link,
@@ -11,7 +12,7 @@ import {
 import React, { useContext } from "react";
 import { DispatchContext, StateContext } from "../App";
 
-export const UsiForm: React.FC = () => {
+export const UsiForm: React.FC<BoxProps> = (props: BoxProps) => {
   const {
     usiForm,
     aiOutput: { isThinking }
@@ -40,16 +41,19 @@ export const UsiForm: React.FC = () => {
   };
 
   return (
-    <Grid templateColumns="1fr 1fr 1fr" columnGap={2} rowGap={4}>
-      <FormControl gridColumn="1/4">
+    <Box {...props}>
+      <FormControl>
         <FormLabel htmlFor="sfen">局面 (SFEN)</FormLabel>
-        <Grid templateColumns="120px 1fr" gap={1}>
+        <Box display={{ md: "flex" }}>
           <Select
             id="sfenSelect"
             aria-labelledby=""
             onChange={e => handleSampleSelected(e.target.value as any)}
             defaultValue="sample1"
             isDisabled={isThinking}
+            w="140px"
+            mr={2}
+            mb={{ base: 2, md: 0 }}
           >
             <option value="sample1">Sample 1</option>
             <option value="sample2">Sample 2</option>
@@ -60,45 +64,48 @@ export const UsiForm: React.FC = () => {
             value={usiForm.sfen}
             onChange={handleFormChange("sfen")}
             isDisabled={isThinking}
+            display={{ base: "none", md: "flex" }}
           />
-        </Grid>
-        <FormHelperText>
+        </Box>
+        <FormHelperText display={{ base: "none", md: "block" }}>
           <Link href="http://shogidokoro.starfree.jp/usi.html" isExternal>
             SFEN 表記法について <Icon name="external-link" mx="1px" />
           </Link>
         </FormHelperText>
       </FormControl>
-      <FormControl>
-        <FormLabel htmlFor="byoyomi">思考時間 (sec)</FormLabel>
-        <Input
-          type="number"
-          id="byoyomi"
-          value={usiForm.byoyomiSec}
-          onChange={handleFormChange("byoyomiSec")}
-          isDisabled={isThinking}
-        />
-      </FormControl>
-      <FormControl>
-        <FormLabel htmlFor="multipv">候補手数</FormLabel>
-        <Input
-          type="number"
-          id="multipv"
-          value={usiForm.multiPv}
-          onChange={handleFormChange("multiPv")}
-          isDisabled={isThinking}
-        />
-      </FormControl>
-      <FormControl>
-        <FormLabel htmlFor="hash">置換表サイズ (MB)</FormLabel>
-        <Input
-          type="number"
-          id="hash"
-          value={usiForm.hash}
-          onChange={handleFormChange("hash")}
-          isDisabled={isThinking}
-        />
-      </FormControl>
-    </Grid>
+      <Box display={{ base: "none", md: "flex" }} mt={4}>
+        <FormControl mr={4}>
+          <FormLabel htmlFor="byoyomi">思考時間 (sec)</FormLabel>
+          <Input
+            type="number"
+            id="byoyomi"
+            value={usiForm.byoyomiSec}
+            onChange={handleFormChange("byoyomiSec")}
+            isDisabled={isThinking}
+          />
+        </FormControl>
+        <FormControl mr={4}>
+          <FormLabel htmlFor="multipv">候補手数</FormLabel>
+          <Input
+            type="number"
+            id="multipv"
+            value={usiForm.multiPv}
+            onChange={handleFormChange("multiPv")}
+            isDisabled={isThinking}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel htmlFor="hash">置換表サイズ (MB)</FormLabel>
+          <Input
+            type="number"
+            id="hash"
+            value={usiForm.hash}
+            onChange={handleFormChange("hash")}
+            isDisabled={isThinking}
+          />
+        </FormControl>
+      </Box>
+    </Box>
   );
 };
 

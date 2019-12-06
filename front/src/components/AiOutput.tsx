@@ -1,20 +1,20 @@
-import { Box } from "@chakra-ui/core";
+import { Box, BoxProps } from "@chakra-ui/core";
 import React, { useContext } from "react";
 import { StateContext } from "../App";
 import { Table, TData, THead } from "./Table";
 
-export const AiOutput: React.FC = () => {
+export const AiOutput: React.FC<BoxProps> = (props: BoxProps) => {
   const state = useContext(StateContext).aiOutput;
 
   return (
-    <Box w="100%" marginBottom={4}>
+    <Box w="100%" {...props}>
       <Table style={{ tableLayout: "fixed" }}>
         <thead>
           <tr>
             <THead w="2rem">#</THead>
             <THead w="6rem">指し手</THead>
-            <THead w="6rem">スコア</THead>
-            <THead w="6rem">探索深さ</THead>
+            <THead w={{ base: "3rem", md: "6rem" }}>スコア</THead>
+            <THead w={{ base: "3rem", md: "6rem" }}>探索深さ</THead>
             <THead>読み筋</THead>
           </tr>
         </thead>

@@ -1,19 +1,17 @@
 import React, { useContext } from "react";
 import { StateContext, DispatchContext } from "../App";
-import { Box } from "@chakra-ui/core";
+import { Box, BoxProps } from "@chakra-ui/core";
 
-export const BoardImage: React.FC = () => {
+export const BoardImage: React.FC<BoxProps> = (props: BoxProps) => {
   const state = useContext(StateContext).boardImageSfen;
   const dispatch = useContext(DispatchContext);
 
   return (
-    <Box>
+    <Box {...props}>
       <img
         src={`http://sfenreader.appspot.com/sfen?sfen=${encodeURIComponent(
           state
         )}`}
-        width="300px"
-        height="308px"
         onClick={e => dispatch({ type: "updateBoardImage" })}
       />
     </Box>

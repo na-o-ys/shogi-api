@@ -57,7 +57,7 @@ export const runUsi: APIGatewayProxyHandler = async (
       event.requestContext,
       event.requestContext.connectionId,
       JSON.stringify({ seqId, data })
-    );
+    ).catch(console.error);
   });
 
   process.stdin.write(data);

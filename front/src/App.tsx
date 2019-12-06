@@ -1,4 +1,4 @@
-import { Box, CSSReset, Grid, ThemeProvider, Heading } from "@chakra-ui/core";
+import { Box, CSSReset, Heading, ThemeProvider } from "@chakra-ui/core";
 import React, { Dispatch, useReducer } from "react";
 import { Action } from "./actions";
 import "./App.css";
@@ -23,26 +23,37 @@ const App: React.FC = () => {
       <DispatchContext.Provider value={dispatch}>
         <ThemeProvider>
           <CSSReset />
-          <Grid
-            templateColumns="1fr"
-            gap={2}
+          <Box
             my={8}
             mx="auto"
-            px="2rem"
+            px={{ base: 4, md: 8 }}
             maxWidth="1024px"
             color="gray.700"
           >
             <Heading>Serverless Shogi DEMO</Heading>
-            <Grid templateColumns="1fr 300px" gap={1} my={8} height="308px">
-              <Box my="auto">
+            <Box
+              display={{ md: "flex " }}
+              flexDirection="row-reverse"
+              mt={{ base: 2, md: 8 }}
+            >
+              <BoardImage w={{ base: "240px", md: "300px" }} mx="auto" />
+              <Box
+                my="auto"
+                ml="0"
+                mr={4}
+                w={{ md: "calc(100% - 300px)" }}
+                display={{ base: "flex", md: "block" }}
+              >
                 <UsiForm />
-                <StartButton />
+                <StartButton
+                  ml={{ base: "auto", md: 0 }}
+                  mr={{ base: 0, md: "auto" }}
+                />
               </Box>
-              <BoardImage />
-            </Grid>
-            <AiOutput />
-            <Console />
-          </Grid>
+            </Box>
+            <Console my={4} />
+            <AiOutput my={4} />
+          </Box>
         </ThemeProvider>
       </DispatchContext.Provider>
     </StateContext.Provider>
